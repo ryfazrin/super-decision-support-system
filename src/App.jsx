@@ -1,17 +1,15 @@
-import { useState } from 'react'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
+import { RouterProvider } from 'react-router-dom';
 import './App.css'
-import { Button } from 'antd'
+import router from './router.jsx';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <Button type="primary">Button</Button>
-    </>
+    <div className="App">
+      <RouterProvider router={router} />
+    </div>
   )
 }
 
-export default App
+export default App;
