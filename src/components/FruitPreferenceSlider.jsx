@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Typography, Slider, Row, Col } from 'antd';
+
 const { Text } = Typography;
 
 function PreferenceForm() {

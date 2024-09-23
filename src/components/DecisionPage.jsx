@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Input, Button, Select, Form, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import AntDesignLikeSlider from './AntDesignLikeSlider';
 
 const { Option } = Select;
 
@@ -18,13 +19,25 @@ function DecisionPage() {
       content: param.parameter // Menggunakan input pengguna
     }));
 
+    const newValues = {
+      ...values,
+      parameters,
+    };
+
+    console.log(newValues);
+
     if (values.method === 'SAW' || values.method === 'TOPSIS') {
       navigate('/weight-direct-method', { state: { 
-        parameters: parameters,
-      } });
-    } else {
-      // Handle untuk metode lain atau default halaman
-      navigate('/another-method-page', { state: { method: values.method } });
+        values: newValues,
+      }});
+    } else if (values.method === 'WP') {
+      navigate('/weight-wp-method', { state: { 
+        values: newValues,
+      }});
+    } else if (values.method === 'AHP') {
+      navigate('/weight-ahp-method', { state: { 
+        values: newValues,
+      }});
     }
   };
 
