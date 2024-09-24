@@ -35,7 +35,7 @@ const getListStyle = isDraggingOver => ({
   width: 250
 });
 
-function WpMethodPage() {
+function WpDragDrop() {
   const [items, setItems] = useState(getItems(10));
 
   const onDragEnd = (result) => {
@@ -87,4 +87,4 @@ function WpMethodPage() {
   );
 }
 
-export default WpMethodPage;
+export default WpDragDrop;

@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import DecisionPage from './components/DecisionPage';
-import WpMethodPage from './components/WpMethodPage[BUG]';
+import WpMethodPage from './components/WpMethodPage';
 import DirectMethodPage from './components/DirectMethodPage';
 import FruitPreferenceSlider from './components/FruitPreferenceSlider';
 import AhpMethodPage from './components/AhpMethodPage';
