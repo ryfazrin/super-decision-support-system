@@ -1,70 +1,76 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Form, Button } from 'antd';
+import { useLocation } from 'react-router-dom';
 import '../assets/AntDesignLikeSlider.css';
 
+// Fungsi untuk membuat kombinasi pasangan parameter
+// const createComparisonPairs = (parameters) => {
+//   const pairs = [];
+//   for (let i = 0; i < parameters.length; i++) {
+//     for (let j = 0; j < parameters.length; j++) {
+//       if (i !== j) {
+//         pairs.push({ first: parameters[i].parameter, second: parameters[j].parameter });
+//       }
+//     }
+//   }
+//   return pairs;
+// };
+const createComparisonPairs = (parameters) => {
+  const pairs = [];
+  for (let i = 0; i < parameters.length; i++) {
+    for (let j = i + 1; j < parameters.length; j++) {
+      pairs.push({ first: parameters[i].parameter, second: parameters[j].parameter });
+    }
+  }
+  return pairs;
+};
+
 function AntDesignLikeSlider() {
-  const marks = {
-    0: {
-      label: 'Lebih baik dari',
-      value: 3,
-    },
-    25: {
-      label: 'baik dari',
-      value: 2,
-    },
-    50: {
-      label: 'sama',
-      value: 1,
-    },
-    75: {
-      label: 'baik dari',
-      value: 2,
-    },
-    100: {
-      label: 'Lebih baik dari',
-      value: 3,
-    },
+  const location = useLocation();
+  const { parameters } = location.state; // Terima parameter dari DecisionPage
+  const comparisonPairs = createComparisonPairs(parameters); // Membuat pasangan perbandingan
+
+  // Set nilai slider untuk setiap perbandingan pasangan parameter
+  const [sliders, setSliders] = useState(
+    comparisonPairs.map(() => 50) // Nilai slider default (Netral, di tengah)
+  );
+
+  const handleSliderChange = (index, value) => {
+    const newSliders = [...sliders];
+    newSliders[index] = value;
+    setSliders(newSliders);
   };
-  // const marks = {
-  //   0: '0%',
-  //   25: '25%',
-  //   50: '50%',
-  //   75: '75%',
-  //   100: '100%'
-  // };
 
-  const [selectedMark, setSelectedMark] = useState(marks[50]);
-
-  const [value, setValue] = useState(50);
-
-  const handleChange = (event) => {
-    const newValue = parseInt(event.target.value, 10);
-    setValue(newValue);
-    setSelectedMark(marks[newValue]);
-    console.log(marks[newValue]);
+  // Fungsi untuk menangani submit form
+  const handleSubmit = (values) => {
+    console.log('Form submitted:', { sliders, comparisonPairs });
+    // Lakukan sesuatu dengan nilai slider (misalnya mengirim ke server atau menampilkan hasil)
   };
 
   return (
-    <div className="slider-container">
-      <input
-        type="range"
-        min="0"
-        max="100"
-        value={value}
-        onChange={handleChange}
-        className="slider"
-        step="25"
-      />
-      <div className="tooltip" style={{ left: `${value}%` }}>
-        {value}
-      </div>
-      <div className="slider-marks">
-        {Object.entries(marks).map(([key, value], index) => (
-          <div key={index} className="mark" style={{ left: `${key}%` }}>
-            {value.label}
+    <Form onFinish={handleSubmit} layout="vertical">
+      {comparisonPairs.map((pair, index) => (
+        <Form.Item key={index} label={`${pair.second} vs ${pair.first}`}>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={sliders[index]}
+            onChange={(e) => handleSliderChange(index, e.target.value)}
+            className="slider"
+            step={50}
+          />
+          <div className="tooltip" style={{ left: `${sliders[index]}%` }}>
+            {sliders[index] > 50 ? `${pair.first} lebih baik` : sliders[index] < 50 ? `${pair.second} lebih baik` : 'Netral'}
           </div>
-        ))}
-      </div>
-    </div>
+        </Form.Item>
+      ))}
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }
 

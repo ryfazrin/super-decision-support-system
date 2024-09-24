@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Input, Button, Select, Form, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import AntDesignLikeSlider from './AntDesignLikeSlider';
 
 const { Option } = Select;
 
@@ -35,9 +34,24 @@ function DecisionPage() {
         values: newValues,
       }});
     } else if (values.method === 'AHP') {
-      navigate('/weight-ahp-method', { state: { 
-        values: newValues,
-      }});
+      const parameters = values.parameters;
+
+      navigate('/weight-ahp-method', { state: { parameters } });
+
+      // // Buat marks berdasarkan jumlah parameter dan distribusikan secara proporsional
+      // const marks = {};
+      // const step = 100 / (parameters.length - 1); // Bagi 100 sesuai jumlah parameter
+      // parameters.forEach((param, index) => {
+      //   marks[Math.round(step * index)] = {
+      //     label: param,
+      //     value: index + 1 // Nilai object berdasarkan urutan
+      //   };
+      // });
+
+      // // Navigasi ke halaman slider dengan marks yang dibuat
+      // navigate('/weight-ahp-method', { state: { 
+      //   marks,
+      // }});
     }
   };
 
