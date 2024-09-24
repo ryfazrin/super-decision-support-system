@@ -113,7 +113,7 @@ function DecisionPage() {
         <Select placeholder="Pilih metode">
           <Option value="SAW">SAW</Option>
           <Option value="WP">WP</Option>
-          <Option value="topsis">TOPSIS</Option>
+          <Option value="TOPSIS">TOPSIS</Option>
           <Option value="AHP">AHP</Option>
         </Select>
       </Form.Item>
