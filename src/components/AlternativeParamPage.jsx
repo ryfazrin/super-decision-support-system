@@ -26,16 +26,13 @@ const AlternativeParametersForm = () => {
   const { parameters, dssAlternativeParameters } = data.values;
 
   const onFinish = (values) => {
-    const transformedDssAlternativeParametersValues = {
+
+    const newValues = {
+      ...data.values,
       dssAlternativeParameters: dssAlternativeParameters.map((alternative) => ({
         alternativeName: alternative.alternativeName,
         parameterValues: parameters.map((param) => values[alternative.alternativeName][param]),
       })),
-    };
-
-    const newValues = {
-      ...data.values,
-      dssAlternativeParameters: transformedDssAlternativeParametersValues
     }
 
     if (newValues.method === 'SAW' || newValues.method === 'TOPSIS') {
