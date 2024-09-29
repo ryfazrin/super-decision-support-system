@@ -14,7 +14,7 @@ function App() {
 
   return (
     <Layout style={{
-      height: '100vh'
+      minHeight: '100vh'
     }}>
       <Content style={{ padding: '0 48px' }}>
         <Breadcrumb style={{ margin: '16px 0' }}>
