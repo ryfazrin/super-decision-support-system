@@ -4,13 +4,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Form, InputNumber, Button, message, Typography, Card, Space } from 'antd';
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
+import axiosInstance from '../lib/axiosInstance';
 
 const { Title } = Typography;
 
 // Fungsi untuk mengirim data ke API
 const postData = async (data) => {
   // Ganti URL dengan endpoint API Anda
-  return axios.post('https://api.example.com/submit', data);
+  return axiosInstance.post('/public/dss', data);
 };
 
 const DirectMethodPage = () => {
@@ -22,10 +23,12 @@ const DirectMethodPage = () => {
 
   // Menggunakan React Query untuk menangani mutasi data
   const { mutate, isLoading } = useMutation(postData, {
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data.data);
       message.success('Data berhasil dikirim!');
       // Optionally, reset form atau navigasi ke halaman lain
       // form.resetFields();
+      navigate('/result', { state: { data: data.data } });
     },
     onError: (error) => {
       message.error(`Gagal mengirim data: ${error.message}`);
@@ -69,7 +72,13 @@ const DirectMethodPage = () => {
     });
 
     // Kirim data ke API
-    // mutate(transformedData);
+    mutate({
+      ...location.state.values,
+      weight: {
+        method: 'DIRECT',
+        values: parameters.map(param => values.weights[param]),
+      }
+    });
   };
 
   return (

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Input, Button, Select, Form, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { Typography } from 'antd';
 
+const { Title } = Typography;
 const { Option } = Select;
 
 function DecisionPage() {
@@ -47,84 +49,87 @@ function DecisionPage() {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item label="Topik" name="topik" rules={[{ required: true, message: 'Topik harus diisi!' }]}>
-        <Input placeholder="Masukkan topik" />
-      </Form.Item>
+    <div style={{ padding: 24 }}>
+      <Title level={2}>SPK</Title>
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form.Item label="Topik" name="topik" rules={[{ required: true, message: 'Topik harus diisi!' }]}>
+          <Input placeholder="Masukkan topik" />
+        </Form.Item>
 
-      <Form.List name="parameters">
-        {(fields, { add, remove }) => (
-          <>
-            <Form.Item label="Parameter">
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Tambah Parameter
-              </Button>
-            </Form.Item>
-            {fields.map(({ key, name, ...restField }) => (
-              <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <Form.Item
-                  {...restField}
-                  name={[name, 'parameter']}
-                  rules={[{ required: true, message: 'Parameter tidak boleh kosong' }]}
-                >
-                  <Input placeholder="Nama Parameter" />
-                </Form.Item>
-                <Form.Item
-                  {...restField}
-                  name={[name, 'criteria']}
-                  rules={[{ required: true, message: 'Criteria tidak boleh kosong' }]}
-                >
-                  <Select placeholder="Pilih metode">
-                    <Option value="DSS_CRITERIA_BENEFIT">BENEFIT</Option>
-                    <Option value="DSS_CRITERIA_COST">COST</Option>
-                  </Select>
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(name)} />
-              </Space>
-            ))}
-          </>
-        )}
-      </Form.List>
+        <Form.List name="parameters">
+          {(fields, { add, remove }) => (
+            <>
+              <Form.Item label="Parameter">
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Tambah Parameter
+                </Button>
+              </Form.Item>
+              {fields.map(({ key, name, ...restField }) => (
+                <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'parameter']}
+                    rules={[{ required: true, message: 'Parameter tidak boleh kosong' }]}
+                  >
+                    <Input placeholder="Nama Parameter" />
+                  </Form.Item>
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'criteria']}
+                    rules={[{ required: true, message: 'Criteria tidak boleh kosong' }]}
+                  >
+                    <Select placeholder="Pilih metode">
+                      <Option value="DSS_CRITERIA_BENEFIT">BENEFIT</Option>
+                      <Option value="DSS_CRITERIA_COST">COST</Option>
+                    </Select>
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} />
+                </Space>
+              ))}
+            </>
+          )}
+        </Form.List>
 
-      <Form.List name="alternatives">
-        {(fields, { add, remove }) => (
-          <>
-            <Form.Item label="Alternatif">
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Tambah Alternatif
-              </Button>
-            </Form.Item>
-            {fields.map(({ key, name, ...restField }) => (
-              <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <Form.Item
-                  {...restField}
-                  name={[name, 'alternative']}
-                  rules={[{ required: true, message: 'Alternatif tidak boleh kosong' }]}
-                >
-                  <Input placeholder="Nama Alternatif" />
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(name)} />
-              </Space>
-            ))}
-          </>
-        )}
-      </Form.List>
+        <Form.List name="alternatives">
+          {(fields, { add, remove }) => (
+            <>
+              <Form.Item label="Alternatif">
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Tambah Alternatif
+                </Button>
+              </Form.Item>
+              {fields.map(({ key, name, ...restField }) => (
+                <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'alternative']}
+                    rules={[{ required: true, message: 'Alternatif tidak boleh kosong' }]}
+                  >
+                    <Input placeholder="Nama Alternatif" />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} />
+                </Space>
+              ))}
+            </>
+          )}
+        </Form.List>
 
-      <Form.Item label="Pilih Metode" name="method" rules={[{ required: true, message: 'Metode harus dipilih!' }]}>
-        <Select placeholder="Pilih metode">
-          <Option value="SAW">SAW</Option>
-          <Option value="WP">WP</Option>
-          <Option value="TOPSIS">TOPSIS</Option>
-          <Option value="AHP">AHP</Option>
-        </Select>
-      </Form.Item>
+        <Form.Item label="Pilih Metode" name="method" rules={[{ required: true, message: 'Metode harus dipilih!' }]}>
+          <Select placeholder="Pilih metode">
+            <Option value="SAW">SAW</Option>
+            <Option value="WP">WP</Option>
+            {/* <Option value="TOPSIS">TOPSIS</Option>
+            <Option value="AHP">AHP</Option> */}
+          </Select>
+        </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Next
-        </Button>
-      </Form.Item>
-    </Form>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Next
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
   );
 }
 

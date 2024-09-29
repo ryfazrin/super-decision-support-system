@@ -5,6 +5,7 @@ import DirectMethodPage from './components/DirectMethodPage';
 import FruitPreferenceSlider from './components/FruitPreferenceSlider';
 import AhpMethodPage from './components/AhpMethodPage';
 import AlternativeParametersForm from './components/AlternativeParamPage';
+import RankedAlternativesTable from './components/RankedAlternativesTable';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/weight-ahp-method",
     element: <AhpMethodPage />,
+  },
+  {
+    path: "/result",
+    element: <RankedAlternativesTable />,
   },
   // Example
   {

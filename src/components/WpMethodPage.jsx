@@ -62,6 +62,7 @@ function WpMethodPage() {
     console.log({
       ...location.state.values,
       weight: {
+        method: 'DIRECT',
         values: parameters.map(param => values.weight[param])
       }
     });
