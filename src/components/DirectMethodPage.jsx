@@ -1,20 +1,30 @@
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Form, InputNumber, Button, message } from 'antd';
-import { useMutation } from '@tanstack/react-query';
+// DirectMethodPage.js
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Form, InputNumber, Button, message, Typography, Card, Space } from 'antd';
 import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
+const { Title } = Typography;
+
+// Fungsi untuk mengirim data ke API
 const postData = async (data) => {
+  // Ganti URL dengan endpoint API Anda
   return axios.post('https://api.example.com/submit', data);
 };
 
-function DirectMethodPage() {
+const DirectMethodPage = () => {
   const location = useLocation();
-  const [parameters, setParameters] = useState(location.state.values.parameters);
+  const navigate = useNavigate();
 
-  const { mutate, isLoading, error } = useMutation(postData, {
+  // Mengakses data yang diteruskan dari HomePage
+  const { parameters } = location.state.values || {};
+
+  // Menggunakan React Query untuk menangani mutasi data
+  const { mutate, isLoading } = useMutation(postData, {
     onSuccess: () => {
       message.success('Data berhasil dikirim!');
+      // Optionally, reset form atau navigasi ke halaman lain
       // form.resetFields();
     },
     onError: (error) => {
@@ -22,40 +32,83 @@ function DirectMethodPage() {
     }
   });
 
-  const handleChange = (value, index) => {
-    const newParameters = [...parameters];
-    newParameters[index].percentage = value;
-    setParameters(newParameters);
-  };
+  // Jika data tidak ditemukan, tampilkan pesan error dan opsi untuk kembali
+  if (!parameters) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={3}>
+          Data tidak ditemukan. Kembali ke{' '}
+          <a onClick={() => navigate('/')}>Home</a>.
+        </Title>
+      </div>
+    );
+  }
 
-  const handleSubmit = () => {
-    console.log(location.state.values);
-    const totalPercentage = parameters.reduce((total, param) => total + param.percentage, 0);
-    if (totalPercentage === 100) {
-      message.success('Total percentage is exactly 100%!');
-      // Process further or navigate away
-    } else {
-      message.error(`Total percentage must equal 100%. Currently: ${totalPercentage}%`);
+  // Menyiapkan nilai awal untuk form
+  const initialWeights = {};
+  parameters.forEach(param => {
+    initialWeights[param] = 0; // Nilai awal, bisa disesuaikan
+  });
+
+  // Handler untuk submit form
+  const onFinish = (values) => {
+    // Validasi: total weight harus sama dengan 100
+    const totalWeight = Object.values(values.weights).reduce((sum, weight) => sum + weight, 0);
+    if (totalWeight !== 100) {
+      message.error(`Total weight harus sama dengan 100%. Saat ini: ${totalWeight}%`);
+      return;
     }
+
+    // Transformasi data ke format yang diinginkan
+    console.log({
+      ...location.state.values,
+      weight: {
+        method: 'DIRECT',
+        values: parameters.map(param => values.weights[param])
+      }
+    });
+
+    // Kirim data ke API
+    // mutate(transformedData);
   };
 
   return (
-    <Form onFinish={handleSubmit}>
-      {parameters.map((param, index) => (
-        <Form.Item label={`${param.content} Percentage`} key={param.id}>
-          <InputNumber
-            min={0}
-            max={100}
-            defaultValue={param.percentage}
-            onChange={(value) => handleChange(value, index)}
-            formatter={value => `${value}%`}
-            parser={value => value.replace('%', '')}
-          />
+    <div style={{ padding: 24 }}>
+      <Title level={2}>Input Weight Parameters</Title>
+      <Form
+        layout="vertical"
+        onFinish={onFinish}
+        initialValues={{ weights: initialWeights }}
+      >
+        <Card style={{ marginBottom: 24 }}>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            {parameters.map((param, index) => (
+              <Form.Item
+                key={param}
+                label={`${param} Weight`}
+                name={['weights', param]}
+                rules={[{ required: true, message: `Masukkan weight untuk ${param}` }]}
+              >
+                <InputNumber
+                  min={1}
+                  max={100}
+                  style={{ width: '100%' }}
+                  formatter={value => `${value}%`}
+                  parser={value => value.replace('%', '')}
+                />
+              </Form.Item>
+            ))}
+          </Space>
+        </Card>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={isLoading}>
+            Submit
+          </Button>
         </Form.Item>
-      ))}
-      <Button type="primary" htmlType="submit">Submit</Button>
-    </Form>
+      </Form>
+    </div>
   );
-}
+};
 
 export default DirectMethodPage;

@@ -13,46 +13,37 @@ function DecisionPage() {
 
   const onFinish = (values) => {
     // Gunakan navigate untuk mengirim data ke WPMethodPage
-    const parameters = values.parameters.map((param, index) => ({
-      id: `param-${index}`, // Membuat ID unik berdasarkan index
-      content: param.parameter // Menggunakan input pengguna
-    }));
+    // const parameters = values.parameters.map((param, index) => ({
+    //   id: `param-${index}`, // Membuat ID unik berdasarkan index
+    //   content: param.parameter, // Menggunakan input pengguna
+    //   criteria: param.criteria
+    // }));
 
+    // const newValues = {
+    //   ...values,
+    //   parameters,
+    // };
     const newValues = {
-      ...values,
-      parameters,
-    };
-
-    console.log(newValues);
-
-    if (values.method === 'SAW' || values.method === 'TOPSIS') {
-      navigate('/weight-direct-method', { state: { 
-        values: newValues,
-      }});
-    } else if (values.method === 'WP') {
-      navigate('/weight-wp-method', { state: { 
-        values: newValues,
-      }});
-    } else if (values.method === 'AHP') {
-      const parameters = values.parameters;
-
-      navigate('/weight-ahp-method', { state: { parameters } });
-
-      // // Buat marks berdasarkan jumlah parameter dan distribusikan secara proporsional
-      // const marks = {};
-      // const step = 100 / (parameters.length - 1); // Bagi 100 sesuai jumlah parameter
-      // parameters.forEach((param, index) => {
-      //   marks[Math.round(step * index)] = {
-      //     label: param,
-      //     value: index + 1 // Nilai object berdasarkan urutan
-      //   };
-      // });
-
-      // // Navigasi ke halaman slider dengan marks yang dibuat
-      // navigate('/weight-ahp-method', { state: { 
-      //   marks,
-      // }});
+      method: values.method,
+      parameters: values.parameters.map((param, index) => param.parameter),
+      criteria: values.parameters.map((param, index) => param.criteria),
+      dssAlternativeParameters: values.alternatives.map((param, index) => ({
+        alternativeName: param.alternative
+      })),
     }
+
+    console.log({
+      method: values.method,
+      parameters: values.parameters.map((param, index) => param.parameter),
+      criteria: values.parameters.map((param, index) => param.criteria),
+      dssAlternativeParameters: values.alternatives.map((param, index) => ({
+        alternativeName: param.alternative
+      })),
+    });
+
+    navigate('/alternative-params', { state: { 
+      values: newValues,
+    }});
   };
 
   return (
@@ -77,6 +68,16 @@ function DecisionPage() {
                   rules={[{ required: true, message: 'Parameter tidak boleh kosong' }]}
                 >
                   <Input placeholder="Nama Parameter" />
+                </Form.Item>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'criteria']}
+                  rules={[{ required: true, message: 'Criteria tidak boleh kosong' }]}
+                >
+                  <Select placeholder="Pilih metode">
+                    <Option value="DSS_CRITERIA_BENEFIT">BENEFIT</Option>
+                    <Option value="DSS_CRITERIA_COST">COST</Option>
+                  </Select>
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(name)} />
               </Space>

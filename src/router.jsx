@@ -4,11 +4,16 @@ import WpMethodPage from './components/WpMethodPage';
 import DirectMethodPage from './components/DirectMethodPage';
 import FruitPreferenceSlider from './components/FruitPreferenceSlider';
 import AhpMethodPage from './components/AhpMethodPage';
+import AlternativeParametersForm from './components/AlternativeParamPage';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <DecisionPage />,
+  },
+  {
+    path: "/alternative-params",
+    element: <AlternativeParametersForm />,
   },
   {
     path: "/weight-wp-method",
