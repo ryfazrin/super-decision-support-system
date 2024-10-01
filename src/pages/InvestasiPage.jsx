@@ -1,61 +1,43 @@
 // InvestasiPage.js
-import { useState, useEffect } from 'react';
-import { Form, Slider, InputNumber, Button, message, Typography, Card, Space } from 'antd';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { Form, Slider, Button, message, Typography, Card, Space, Spin } from 'antd';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../lib/axiosInstance';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+// Fungsi untuk mengambil data dari API
+const fetchInvestasiParameters = async () => {
+  const response = await axiosInstance.get('/public/dss/investasi'); // Ganti dengan endpoint API Anda
+  return response.data.data.parameters;
+};
 
 // Fungsi untuk mengirim data ke server
 const postInvestasiData = async (data) => {
-  // Ganti URL dengan endpoint API Anda
-  const response = await axios.post('https://api.example.com/investasi', data);
+  const response = await axiosInstance.post('/public/dss/investasi', data); // Ganti dengan endpoint API Anda
   return response.data; // Pastikan ini adalah data yang dapat dikloning
+};
+
+// Mapping untuk rangeLabel berdasarkan nama parameter
+const rangeLabelMapping = {
+  "Jangka Waktu": { min: "1", max: "100" },
+  "Return Value": { min: "1", max: "100" },
+  "Tingkat Likuiditas": { min: "1", max: "100" },
+  "Modal": { min: "1", max: "100" },
+  "Pajak": { min: "1", max: "100" },
+  "Tingkat Resiko": { min: "1", max: "100" },
 };
 
 const InvestasiPage = () => {
   const navigate = useNavigate();
 
-  // Data yang diberikan
-  const parameters = [
-    {
-      id: 1,
-      paramName: "return uang",
-      range: { min: 2, max: 10 },
-      rangeLabel: { min: "cepat", max: "lambat" },
-    },
-    {
-      id: 2,
-      paramName: "resiko",
-      range: { min: 2, max: 10 },
-      rangeLabel: { min: "rendah", max: "tinggi" },
-    },
-    {
-      id: 3,
-      paramName: "return uang",
-      range: { min: 2, max: 10 },
-      rangeLabel: { min: "cepat", max: "lambat" },
-    },
-  ];
-
-  // Menyiapkan nilai awal untuk form
-  const initialValues = {
-    weights: parameters.reduce((acc, param) => {
-      acc[param.id] = 0;
-      return acc;
-    }, {}),
-    sliders: parameters.reduce((acc, param) => {
-      acc[param.id] = param.range.min;
-      return acc;
-    }, {})
-  };
-
-  // State untuk mengelola total weight
-  const [totalWeight, setTotalWeight] = useState(0);
+  // Mengambil data parameter dari API menggunakan useQuery
+  const { data, isLoading, isError, error } = useQuery(['investasiParameters'], fetchInvestasiParameters);
 
   // Menggunakan React Query untuk menangani mutasi data
-  const { mutate, isLoading } = useMutation(postInvestasiData, {
+  const { mutate, isLoading: isSubmitting } = useMutation(postInvestasiData, {
     onSuccess: (data) => {
       message.success('Data berhasil dikirim!');
       navigate('/result', { state: { data } });
@@ -65,26 +47,59 @@ const InvestasiPage = () => {
     }
   });
 
+  // Inisialisasi form dengan nilai awal
+  const [form] = Form.useForm();
+
+  // State untuk menyimpan nilai sliders
+  const [sliders, setSliders] = useState({});
+
+  // State untuk menyimpan sisa total yang tersedia
+  const [remainingTotal, setRemainingTotal] = useState(100);
+
+  useEffect(() => {
+    if (data) {
+      const initialSliders = {};
+      data.forEach(param => {
+        initialSliders[param.code] = 1; // Nilai awal minimal 1
+      });
+      setSliders(initialSliders);
+      setRemainingTotal(100 - Object.keys(initialSliders).length); // 100 - N*1
+      form.setFieldsValue({
+        sliders: initialSliders,
+      });
+    }
+  }, [data, form]);
+
+  // Handler untuk perubahan slider
+  const handleSliderChange = (value, paramCode) => {
+    const previousValue = sliders[paramCode] || 1;
+    const newSliders = { ...sliders, [paramCode]: value };
+    const total = Object.values(newSliders).reduce((sum, val) => sum + val, 0);
+    const newRemaining = 100 - total;
+
+    setSliders(newSliders);
+    setRemainingTotal(newRemaining >= 0 ? newRemaining : 0);
+
+    form.setFieldsValue({ sliders: newSliders });
+  };
+
   // Handler untuk submit form
   const onFinish = (values) => {
-    console.log('Original Form Values:', values);
+    console.log('Form Values:', values);
 
-    // Validasi: total weight harus sama dengan 100
-    if (totalWeight !== 100) {
-      message.error(`Total weight harus sama dengan 100%. Saat ini: ${totalWeight}%`);
+    // Menghitung total untuk memastikan validasi
+    const total = Object.values(values.sliders).reduce((sum, val) => sum + val, 0);
+    if (total !== 100) {
+      message.error(`Total nilai slider harus sama dengan 100. Saat ini: ${total}`);
       return;
     }
 
     // Transformasi data ke format yang diinginkan
     const transformedData = {
-      weights: parameters.map(param => ({
-        paramName: param.paramName,
-        weight: values.weights[param.id]
-      })),
-      sliders: parameters.map(param => ({
-        paramName: param.paramName,
-        value: values.sliders[param.id],
-        rangeLabel: param.rangeLabel
+      parameters: data.map(param => ({
+        code: param.code,
+        name: param.name,
+        amount: values.sliders[param.code]
       }))
     };
 
@@ -94,24 +109,22 @@ const InvestasiPage = () => {
     mutate(transformedData);
   };
 
-  // Menghitung total weight setiap kali weights berubah
-  const handleWeightChange = (value, paramId) => {
-    const newWeights = { ...form.getFieldValue('weights'), [paramId]: value };
-    const total = Object.values(newWeights).reduce((sum, weight) => sum + (weight || 0), 0);
-    setTotalWeight(total);
-  };
+  if (isLoading) {
+    return (
+      <div style={{ padding: 24, textAlign: 'center' }}>
+        <Spin tip="Memuat data..." size="large" />
+      </div>
+    );
+  }
 
-  // Mengelola perubahan slider
-  const handleSliderChange = (value, paramId) => {
-    const newSliders = { ...form.getFieldValue('sliders'), [paramId]: value };
-    form.setFieldsValue({ sliders: newSliders });
-  };
-
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    form.setFieldsValue(initialValues);
-  }, [form]);
+  if (isError) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={3}>Terjadi Kesalahan</Title>
+        <p>{error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 24 }}>
@@ -120,70 +133,51 @@ const InvestasiPage = () => {
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        initialValues={initialValues}
       >
         <Card style={{ marginBottom: 24 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
-            {parameters.map((param) => (
-              <div key={param.id} style={{ marginBottom: 24 }}>
-                <Title level={5}>{param.paramName}</Title>
+            {data.map((param) => (
+              <div key={param.code} style={{ marginBottom: 24 }}>
+                <Title level={5}>{param.name}</Title>
                 <Form.Item
-                  label={`Nilai (${param.rangeLabel.min} - ${param.rangeLabel.max})`}
-                  name={['sliders', param.id]}
+                  label={`Nilai (${rangeLabelMapping[param.name]?.min || "1"} - ${rangeLabelMapping[param.name]?.max || "100"})`}
+                  name={['sliders', param.code]}
                   rules={[
-                    { required: true, message: `Masukkan nilai untuk ${param.paramName}` },
+                    { required: true, message: `Masukkan nilai untuk ${param.name}` },
                     {
                       type: 'number',
-                      min: param.range.min,
-                      max: param.range.max,
-                      message: `Nilai harus antara ${param.range.min} dan ${param.range.max}`
+                      min: 1,
+                      max: 100,
+                      message: `Nilai harus antara 1 dan 100`
                     }
                   ]}
                 >
                   <Slider
-                    min={param.range.min}
-                    max={param.range.max}
-                    marks={{
-                      [param.range.min]: param.rangeLabel.min,
-                      [param.range.max]: param.rangeLabel.max,
-                    }}
-                    onChange={(value) => handleSliderChange(value, param.id)}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label={`Weight (%)`}
-                  name={['weights', param.id]}
-                  rules={[
-                    { required: true, message: `Masukkan weight untuk ${param.paramName}` },
-                    {
-                      type: 'number',
-                      min: 0,
-                      max: 100,
-                      message: 'Weight harus antara 0 dan 100'
-                    }
-                  ]}
-                >
-                  <InputNumber
-                    min={0}
+                    min={1}
                     max={100}
-                    onChange={(value) => handleWeightChange(value, param.id)}
-                    style={{ width: '100%' }}
+                    marks={{
+                      1: "1",
+                      100: "100",
+                    }}
+                    value={sliders[param.code]}
+                    onChange={(value) => handleSliderChange(value, param.code)}
                   />
                 </Form.Item>
+                <Text>Nilai: {sliders[param.code]}</Text>
               </div>
             ))}
           </Space>
         </Card>
 
         <div style={{ marginBottom: 24 }}>
-          <Title level={5}>Total Weight: {totalWeight}%</Title>
-          {totalWeight !== 100 && (
-            <Typography.Text type="danger">Total weight harus sama dengan 100%.</Typography.Text>
+          <Title level={5}>Total Nilai Slider: {Object.values(sliders).reduce((sum, val) => sum + val, 0)} / 100</Title>
+          {Object.values(sliders).reduce((sum, val) => sum + val, 0) !== 100 && (
+            <Typography.Text type="danger">Total nilai slider harus sama dengan 100.</Typography.Text>
           )}
         </div>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={isLoading} disabled={totalWeight !== 100}>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} disabled={Object.values(sliders).reduce((sum, val) => sum + val, 0) !== 100}>
             Submit
           </Button>
         </Form.Item>

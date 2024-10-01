@@ -61,12 +61,60 @@ const RankedAlternativesTable = () => {
     },
   ];
 
+  const columnsParameters = [
+    {
+      title: 'Code',
+      dataIndex: 'code',
+      key: 'code',
+      sorter: (a, b) => a.code.localeCompare(b.code),
+      width: '10%',
+      ellipsis: true,
+    },
+    {
+      title: 'Parameters Name',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      width: '25%',
+      ellipsis: true,
+    },
+    {
+      title: 'Weight',
+      dataIndex: 'amount',
+      key: 'amount',
+      sorter: (a, b) => a.amount.localeCompare(b.amount),
+      width: '10%',
+    },
+  ];
+
   return (
     <Card style={{ margin: '20px' }} bordered={false}>
       <Title level={3}>Ranked Alternatives</Title>
       <Table
         columns={columns}
         dataSource={data.alternativeParameterRanked.map((item, index) => ({
+          key: index,
+          ...item,
+        }))}
+        pagination={{ pageSize: 5 }}
+        bordered
+        rowClassName={(record) => {
+          switch(record.rank) {
+            case 1:
+              return 'rank-1';
+            case 2:
+              return 'rank-2';
+            case 3:
+              return 'rank-3';
+            default:
+              return '';
+          }
+        }}
+      />
+      <Title level={3}>Parameters</Title>
+      <Table
+        columns={columnsParameters}
+        dataSource={data.parameters.map((item, index) => ({
           key: index,
           ...item,
         }))}
