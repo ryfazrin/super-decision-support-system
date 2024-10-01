@@ -1,15 +1,20 @@
 import { createBrowserRouter } from 'react-router-dom';
-import DecisionPage from './components/DecisionPage';
-import WpMethodPage from './components/WpMethodPage';
-import DirectMethodPage from './components/DirectMethodPage';
+import DecisionPage from './pages/DecisionPage';
+import WpMethodPage from './pages/WpMethodPage';
+import DirectMethodPage from './pages/DirectMethodPage';
 import FruitPreferenceSlider from './components/FruitPreferenceSlider';
-import AhpMethodPage from './components/AhpMethodPage';
-import AlternativeParametersForm from './components/AlternativeParamPage';
+import AhpMethodPage from './pages/AhpMethodPage';
+import AlternativeParametersForm from './pages/AlternativeParamPage';
 import RankedAlternativesTable from './components/RankedAlternativesTable';
+import InvestasiPage from './pages/InvestasiPage';
 
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <InvestasiPage />,
+  },
+  {
+    path: "/decision",
     element: <DecisionPage />,
   },
   {

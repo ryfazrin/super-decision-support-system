@@ -1,4 +1,4 @@
-import AntDesignLikeSlider from "./AntDesignLikeSlider";
+import AntDesignLikeSlider from "../components/AntDesignLikeSlider";
 
 function AhpMethodPage() {
   return (
