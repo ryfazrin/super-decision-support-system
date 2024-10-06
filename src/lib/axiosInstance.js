@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'https://zulvani.tech:8080',  // Base URL
+    baseURL: 'https://zulvani.tech',  // Base URL
     timeout: 1000,  // Request timeout
 });
 
