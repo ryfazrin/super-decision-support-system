@@ -1,9 +1,8 @@
-// RankedAlternativesTable.js
 import React from 'react';
-import { Table, Card, Typography } from 'antd';
+import { Table, Card, Typography, Progress, Row, Col } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const RankedAlternativesTable = () => {
   const location = useLocation();
@@ -24,7 +23,7 @@ const RankedAlternativesTable = () => {
     );
   }
 
-  // Mendefinisikan kolom untuk tabel
+  // Mendefinisikan kolom untuk tabel alternatif
   const columns = [
     {
       title: 'Rank',
@@ -32,7 +31,7 @@ const RankedAlternativesTable = () => {
       key: 'rank',
       sorter: (a, b) => a.rank - b.rank,
       defaultSortOrder: 'ascend',
-      width: '10%',
+      width: '5%',
       align: 'center',
     },
     {
@@ -42,13 +41,6 @@ const RankedAlternativesTable = () => {
       sorter: (a, b) => a.alternativeName.localeCompare(b.alternativeName),
       width: '25%',
       ellipsis: true,
-    },
-    {
-      title: 'Parameter Values',
-      dataIndex: 'parameterValues',
-      key: 'parameterValues',
-      render: (values) => values.join(', '),
-      width: '30%',
     },
     {
       title: 'DSS Point',
@@ -61,60 +53,36 @@ const RankedAlternativesTable = () => {
     },
   ];
 
-  const columnsParameters = [
-    {
-      title: 'Code',
-      dataIndex: 'code',
-      key: 'code',
-      sorter: (a, b) => a.code.localeCompare(b.code),
-      width: '10%',
-      ellipsis: true,
-    },
-    {
-      title: 'Parameters Name',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      width: '25%',
-      ellipsis: true,
-    },
-    {
-      title: 'Weight',
-      dataIndex: 'amount',
-      key: 'amount',
-      sorter: (a, b) => a.amount.localeCompare(b.amount),
-      width: '10%',
-    },
-  ];
+  // Style untuk Progress bars
+  const progressStyle = { marginBottom: '10px' };
 
   return (
     <Card style={{ margin: '20px' }} bordered={false}>
-      <Title level={3}>Ranked Alternatives</Title>
+      <Title level={3}>Berdasarkan preferensi dalam memilih investasi berikut ini:</Title>
+
+      {/* Menampilkan parameter dan persentasenya */}
+      <Row gutter={[16, 16]}>
+        {data.parameters.map((param, index) => (
+          <Col span={12} sm={24} md={12} key={index}>
+            <Text strong>{param.name}:</Text>
+            <Progress 
+              percent={param.amount} 
+              showInfo={false} 
+              strokeColor="#1890ff" 
+              // style={progressStyle} 
+              size={['100%', 20]}
+            />
+            <Text>{(param.amount).toFixed(0)}%</Text>
+          </Col>
+        ))}
+      </Row>
+
+      <Title level={3}>Maka urutan instrumen investasi yang paling tepat untuk Anda adalah</Title>
+
+      {/* Menampilkan tabel alternatif dengan rank */}
       <Table
         columns={columns}
         dataSource={data.alternativeParameterRanked.map((item, index) => ({
-          key: index,
-          ...item,
-        }))}
-        pagination={{ pageSize: 5 }}
-        bordered
-        rowClassName={(record) => {
-          switch(record.rank) {
-            case 1:
-              return 'rank-1';
-            case 2:
-              return 'rank-2';
-            case 3:
-              return 'rank-3';
-            default:
-              return '';
-          }
-        }}
-      />
-      <Title level={3}>Parameters</Title>
-      <Table
-        columns={columnsParameters}
-        dataSource={data.parameters.map((item, index) => ({
           key: index,
           ...item,
         }))}

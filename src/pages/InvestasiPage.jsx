@@ -1,8 +1,6 @@
-// InvestasiPage.js
 import React, { useState, useEffect } from 'react';
-import { Form, Slider, Button, message, Typography, Card, Space, Spin } from 'antd';
+import { Form, Slider, Button, message, Typography, Card, Space, Row, Col, Spin } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../lib/axiosInstance';
 
@@ -17,17 +15,7 @@ const fetchInvestasiParameters = async () => {
 // Fungsi untuk mengirim data ke server
 const postInvestasiData = async (data) => {
   const response = await axiosInstance.post('/public/dss/investasi', data); // Ganti dengan endpoint API Anda
-  return response.data; // Pastikan ini adalah data yang dapat dikloning
-};
-
-// Mapping untuk rangeLabel berdasarkan nama parameter
-const rangeLabelMapping = {
-  "Jangka Waktu": { min: "1", max: "100" },
-  "Return Value": { min: "1", max: "100" },
-  "Tingkat Likuiditas": { min: "1", max: "100" },
-  "Modal": { min: "1", max: "100" },
-  "Pajak": { min: "1", max: "100" },
-  "Tingkat Resiko": { min: "1", max: "100" },
+  return response.data;
 };
 
 const InvestasiPage = () => {
@@ -85,16 +73,12 @@ const InvestasiPage = () => {
 
   // Handler untuk submit form
   const onFinish = (values) => {
-    console.log('Form Values:', values);
-
-    // Menghitung total untuk memastikan validasi
     const total = Object.values(values.sliders).reduce((sum, val) => sum + val, 0);
     if (total !== 100) {
       message.error(`Total nilai slider harus sama dengan 100. Saat ini: ${total}`);
       return;
     }
 
-    // Transformasi data ke format yang diinginkan
     const transformedData = {
       parameters: data.map(param => ({
         code: param.code,
@@ -103,9 +87,6 @@ const InvestasiPage = () => {
       }))
     };
 
-    console.log('Transformed Data:', transformedData);
-
-    // Kirim data ke API
     mutate(transformedData);
   };
 
@@ -128,51 +109,60 @@ const InvestasiPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Investasi Parameters Input</Title>
+      <Title level={2}>PEMILIHAN KEPUTUSAN INSTRUMEN INVESTASI</Title>
+      <Text>Silahkan isi preferensi Anda pada parameter berikut ini:</Text>
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
+        style={{ marginTop: '20px' }}
       >
         <Card style={{ marginBottom: 24 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
             {data.map((param) => (
-              <div key={param.code} style={{ marginBottom: 24 }}>
-                <Title level={5}>{param.name}</Title>
-                <Form.Item
-                  label={`Nilai (${rangeLabelMapping[param.name]?.min || "1"} - ${rangeLabelMapping[param.name]?.max || "100"})`}
-                  name={['sliders', param.code]}
-                  rules={[
-                    { required: true, message: `Masukkan nilai untuk ${param.name}` },
-                    {
-                      type: 'number',
-                      min: 1,
-                      max: 100,
-                      message: `Nilai harus antara 1 dan 100`
-                    }
-                  ]}
-                >
-                  <Slider
-                    min={1}
-                    max={100}
-                    marks={{
-                      1: "1",
-                      100: "100",
-                    }}
-                    value={sliders[param.code]}
-                    onChange={(value) => handleSliderChange(value, param.code)}
-                  />
-                </Form.Item>
-                <Text>Nilai: {sliders[param.code]}</Text>
-              </div>
+              <Row key={param.code} gutter={16} align="middle" style={{ marginBottom: 24 }}>
+                <Col sm={24} lg={5}>
+                  <Text strong>{param.name}</Text>
+                </Col>
+                <Col sm={20} lg={16}>
+                  <Form.Item
+                    name={['sliders', param.code]}
+                    rules={[
+                      { required: true, message: `Masukkan nilai untuk ${param.name}` },
+                      {
+                        type: 'number',
+                        min: 1,
+                        max: 100,
+                        message: `Nilai harus antara 1 dan 100`
+                      }
+                    ]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Slider
+                      min={1}
+                      max={100}
+                      marks={{
+                        1: param.labelMin,
+                        100: param.labelMax,
+                      }}
+                      value={sliders[param.code]}
+                      onChange={(value) => handleSliderChange(value, param.code)}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col sm={3} lg={2} offset={1}>
+                  <Text strong>{sliders[param.code]}%</Text>
+                </Col>
+              </Row>
             ))}
           </Space>
         </Card>
 
+        {/* Total Slider Value Display */}
         <div style={{ marginBottom: 24 }}>
-          <Title level={5}>Total Nilai Slider: {Object.values(sliders).reduce((sum, val) => sum + val, 0)} / 100</Title>
+          <Title level={5}>Total Nilai Preferensi: {Object.values(sliders).reduce((sum, val) => sum + val, 0)} / 100</Title>
           {Object.values(sliders).reduce((sum, val) => sum + val, 0) !== 100 && (
-            <Typography.Text type="danger">Total nilai slider harus sama dengan 100.</Typography.Text>
+            <Typography.Text type="danger">Total Nilai Preferensi Harus 100%</Typography.Text>
           )}
         </div>
 
